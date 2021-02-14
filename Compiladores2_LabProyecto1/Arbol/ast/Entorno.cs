@@ -8,7 +8,6 @@ namespace Compiladores2_LabProyecto1.Arbol.ast
     {
 
         private Hashtable tabla;
-
         private Entorno anterior;
 
         public Entorno(Entorno anterior)
@@ -20,10 +19,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ast
         public void agregar(string id, Simbolo simbolo)
         {
             id = id.ToLower();
-            if (simbolo.tipo == Simbolo.Tipos.OBJETO)
-                simbolo.indentificador = id.ToLower();
-            else
-                simbolo.indentificador = simbolo.indentificador.ToLower();
+            simbolo.indentificador = simbolo.indentificador.ToLower();
             Tabla.Add(id, simbolo);
         }
 

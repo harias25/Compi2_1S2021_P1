@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Compiladores2_LabProyecto1.Arbol.ast;
+using Compiladores2_LabProyecto1.Arbol.Intefaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
 {
-    class Simbolo
+    class Simbolo : Expresion
     {
         public enum Tipos
         {
@@ -12,9 +14,15 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
             INT,
             DOUBLE,
             BOOL,
-            OBJETO,
-            FUNCTION,
-            PROCEDURE
+            VOID
+        }
+
+        public Simbolo(Tipos Tipo, string Identificador, int linea, int columna)
+        {
+            this.tipo = Tipo;
+            this.indentificador = Identificador;
+            this.linea = linea;
+            this.columna = columna;
         }
 
         public String indentificador { get; set; }
@@ -26,5 +34,14 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
         public int linea { get; set; }
         public int columna { get; set; }
 
+        public Tipos getTipo(Entorno ent, AST arbol)
+        {
+            return tipo;
+        }
+
+        public object getValorImplicito(Entorno ent, AST arbol)
+        {
+            return valor;
+        }
     }
 }

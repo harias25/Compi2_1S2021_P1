@@ -48,6 +48,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                        menor_igual = ToTerm("<="),
                        mayor_igual = ToTerm(">="),
                        igual = ToTerm("="),
+                       coma = ToTerm(","),
                        resto = ToTerm("%");
                 #endregion
 
@@ -91,7 +92,9 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 NonTerminal EXPRESION_LOGICA = new NonTerminal("EXPRESION_LOGICA");
                 NonTerminal EXPRESION_RELACIONAL = new NonTerminal("EXPRESION_RELACIONAL");
                 NonTerminal DECLARACION = new NonTerminal("DECLARACION");
-                
+                NonTerminal TIPO = new NonTerminal("TIPO");
+                NonTerminal LISTA_SIM = new NonTerminal("LISTA_SIM");
+            NonTerminal ASIGNACION = new NonTerminal("ASIGNACION");
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
@@ -100,15 +103,22 @@ namespace Compiladores2_LabProyecto1.Gramaticas
 
             //INSTRUCCIONES
             INSTRUCCIONES.Rule = MakePlusRule(INSTRUCCIONES, INSTRUCCION);
-            INSTRUCCION.Rule = IMPRIMIR + ptcoma;
-                            // | DECLARACION + ptcoma;
+            INSTRUCCION.Rule = IMPRIMIR + ptcoma
+                             | DECLARACION + ptcoma
+                             | ASIGNACION + ptcoma ;
 
             //IMPRIMIR
             IMPRIMIR.Rule = pr_print + parizq + EXPRESION + parder
                           | pr_println + parizq + EXPRESION + parder;
 
             //DECLARACIONES
-            //DECLARACION.Rule = 
+            DECLARACION.Rule = TIPO + LISTA_SIM
+                             | TIPO + id + igual + EXPRESION;  //declaracion
+
+            LISTA_SIM.Rule = MakePlusRule(LISTA_SIM, coma, id);
+
+            //asignacion
+            ASIGNACION.Rule = id + igual + EXPRESION;  //asignacion
 
             //EXPRESIONES
             EXPRESION.Rule = PRIMITIVA
@@ -140,7 +150,10 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             PRIMITIVA.Rule = numero 
                            | cadena 
                            | pr_true
-                           | pr_false;
+                           | pr_false
+                           | id;  //simbolo
+
+            TIPO.Rule = pr_int | pr_string | pr_boolean | pr_double;
 
             #endregion
 

@@ -3,9 +3,12 @@ using Compiladores2_LabProyecto1.Arbol.ast;
 using Compiladores2_LabProyecto1.Arbol.Instrucciones;
 using Compiladores2_LabProyecto1.Arbol.Intefaces;
 using Compiladores2_LabProyecto1.Arbol.ValoresImplicitos;
+using IDE_C2.Arbol.Instrucciones;
+using IDE_C2.Arbol.ValoresImplicitos;
 using Irony.Parsing;
 using System;
 using System.Collections.Generic;
+using static Compiladores2_LabProyecto1.Arbol.ValoresImplicitos.Simbolo;
 
 namespace Compiladores2_LabProyecto1.Gramaticas
 {
@@ -55,6 +58,50 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                     salto = true;
 
                 return new Print((Expresion)analizarNodo(actual.ChildNodes[1]), salto, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //INSTRUCCION ASIGNACION
+            else if (validarUbicacion(actual, "ASIGNACION"))
+            {
+                return new Asignacion(actual.ChildNodes[0].Token.Text, (Expresion)analizarNodo(actual.ChildNodes[2]), actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
+            }
+            //INSTRUCCION DECLARACION 
+            else if (validarUbicacion(actual, "DECLARACION"))
+            {
+                LinkedList<Simbolo> simbolos = new LinkedList<Simbolo>();
+                Tipos tipo = (Tipos)analizarNodo(actual.ChildNodes[0]);
+
+                if (actual.ChildNodes.Count == 4)
+                {
+                    Simbolo simbolo = new Simbolo(tipo, actual.ChildNodes[1].Token.Text, actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
+                    simbolos.AddLast(simbolo);
+                    return new Declaracion(tipo, simbolos, (Expresion)analizarNodo(actual.ChildNodes[3]), 0, 0);
+                }
+                else
+                {
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
+                    {
+                        Simbolo simbolo = new Simbolo(tipo, hijo.Token.Text, hijo.Token.Location.Line, hijo.Token.Location.Column);
+                        simbolos.AddLast(simbolo);
+                    }
+                    return new Declaracion(tipo, simbolos, null, 0, 0);
+                }
+            }
+            else if (validarUbicacion(actual, "TIPO"))
+            {
+                if (validarUbicacion(actual.ChildNodes[0], "string"))
+                {
+                    return Tipos.STRING;
+                }
+                else if (validarUbicacion(actual.ChildNodes[0], "boolean"))
+                {
+                    return Tipos.BOOL;
+                }
+                else if (validarUbicacion(actual.ChildNodes[0], "double"))
+                {
+                    return Tipos.DOUBLE;
+                }
+                else
+                    return Tipos.INT;
             }
 
             #region EXPRESIONES
@@ -116,6 +163,10 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                         return new Primitivo(getLexema(actual, 0), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
                     }
 
+                }
+                else if (validarUbicacion(actual.ChildNodes[0], "id"))
+                {
+                    return new Identificador(value.ToString(), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
                 }
                 else if(validarUbicacion(actual.ChildNodes[0], "cadena"))
                 {

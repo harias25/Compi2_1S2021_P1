@@ -45,9 +45,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
                 return Tipos.DOUBLE;
             }
             else
-            {
-                return Tipos.OBJETO;
-            }
+                return Tipos.STRING;
         }
 
         public object getValorImplicito(Entorno ent, AST arbol)
