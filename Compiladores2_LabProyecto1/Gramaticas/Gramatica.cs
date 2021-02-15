@@ -49,6 +49,8 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                        mayor_igual = ToTerm(">="),
                        igual = ToTerm("="),
                        coma = ToTerm(","),
+                       llaizq = ToTerm("{"),
+                       llader = ToTerm("}"),
                        resto = ToTerm("%");
                 #endregion
 
@@ -95,6 +97,10 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 NonTerminal TIPO = new NonTerminal("TIPO");
                 NonTerminal LISTA_SIM = new NonTerminal("LISTA_SIM");
             NonTerminal ASIGNACION = new NonTerminal("ASIGNACION");
+            NonTerminal IF = new NonTerminal("IF");
+            NonTerminal BLOQUE_SENTENCIAS_IF = new NonTerminal("BLOQUE_SENTENCIAS_IF");
+            NonTerminal LISTADO_ELSE_IF = new NonTerminal("LISTADO_ELSE_IF");
+            NonTerminal ELSE_IF = new NonTerminal("ELSE_IF");
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
@@ -105,7 +111,21 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             INSTRUCCIONES.Rule = MakePlusRule(INSTRUCCIONES, INSTRUCCION);
             INSTRUCCION.Rule = IMPRIMIR + ptcoma
                              | DECLARACION + ptcoma
-                             | ASIGNACION + ptcoma ;
+                             | ASIGNACION + ptcoma 
+                             | IF ;
+
+            //BLOQUE_SENTENCIAS IF
+            BLOQUE_SENTENCIAS_IF.Rule = llaizq + INSTRUCCIONES + llader
+                                      | INSTRUCCION;
+
+            //IF
+            IF.Rule = pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF
+                    | pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF  + pr_else + BLOQUE_SENTENCIAS_IF
+                    | pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF + pr_else + BLOQUE_SENTENCIAS_IF;
+
+            LISTADO_ELSE_IF.Rule = MakeStarRule(LISTADO_ELSE_IF, ELSE_IF);
+
+            ELSE_IF.Rule = pr_else + pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF;
 
             //IMPRIMIR
             IMPRIMIR.Rule = pr_print + parizq + EXPRESION + parder

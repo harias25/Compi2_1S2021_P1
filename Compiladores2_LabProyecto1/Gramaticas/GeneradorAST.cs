@@ -34,7 +34,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             //INICIO DE GRAMATICA
             if (validarUbicacion(actual, "INIT"))
             {
-                return analizarNodo(actual.ChildNodes[0]);
+                return new AST((LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[0]));
             }
             //LISTADO DE INSTRUCCIONES
             else if (validarUbicacion(actual, "INSTRUCCIONES"))
@@ -44,11 +44,60 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 {
                     instrucciones.AddLast((Instruccion)analizarNodo(hijo));
                 }
-                return new AST(instrucciones);
+                return instrucciones;
             }
             if (validarUbicacion(actual, "INSTRUCCION"))
             {
                 return analizarNodo(actual.ChildNodes[0]);
+            }
+
+            //IF
+            else if (validarUbicacion(actual, "IF"))
+            {
+                Expresion condicionIF = (Expresion)analizarNodo(actual.ChildNodes[1]);
+                LinkedList<Instruccion> instruccioenesIF = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[2]);
+                LinkedList<Instruccion> instruccioenesElse = new LinkedList<Instruccion>();
+                LinkedList<If> listadoElseIF = new LinkedList<If>();
+
+
+                if(actual.ChildNodes.Count == 6) //if - else if - else
+                {
+                    //se obtiene el else
+                    instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[5]);
+                }
+
+                if (actual.ChildNodes.Count == 5) //if - else
+                {
+                    //se obtiene el else
+                    instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[4]);
+                }
+
+                if (actual.ChildNodes.Count != 5 && actual.ChildNodes[3].ChildNodes.Count > 0)  //se verifica que se tengan else if
+                {
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[3].ChildNodes)
+                    {
+                        if (hijo.ChildNodes.Count > 0)
+                        {
+                            listadoElseIF.AddLast(new If((Expresion)analizarNodo(hijo.ChildNodes[2]), (LinkedList<Instruccion>)analizarNodo(hijo.ChildNodes[3]), null, null, hijo.ChildNodes[0].Token.Location.Line, hijo.ChildNodes[0].Token.Location.Column));
+                        }
+                    }
+                }
+
+                return new If(condicionIF, instruccioenesIF, instruccioenesElse,listadoElseIF, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+
+            }
+            //BLOQUE DE SENTENCIAS PARA EL IF
+            else if (validarUbicacion(actual, "BLOQUE_SENTENCIAS_IF"))
+            {
+                
+                if(actual.ChildNodes.Count == 3)
+                    return analizarNodo(actual.ChildNodes[1]);
+                else
+                {
+                    LinkedList<Instruccion> instrucciones = new LinkedList<Instruccion>();
+                    instrucciones.AddLast((Instruccion)analizarNodo(actual.ChildNodes[0]));
+                    return instrucciones;
+                }
             }
             //INSTRUCCION PRINT
             else if (validarUbicacion(actual, "IMPRIMIR"))

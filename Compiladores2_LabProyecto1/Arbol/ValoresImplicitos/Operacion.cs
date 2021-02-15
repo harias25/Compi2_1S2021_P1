@@ -311,7 +311,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
                     #region IGUAL
                     else if (operador == Operador.IGUAL_IGUAL)
                     {
-                        return op1 == op2;
+                        return op1.Equals(op2);
                     }
                     #endregion
                     #region DIFERENTE
