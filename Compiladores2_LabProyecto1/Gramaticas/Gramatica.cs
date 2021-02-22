@@ -23,14 +23,16 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                  pr_else = ToTerm("else"),
                  pr_for = ToTerm("for"),
                  pr_while = ToTerm("while"),
+                 pr_continue = ToTerm("continue"),
+                 pr_break = ToTerm("break"),
                  pr_boolean = ToTerm("boolean");
 
                 // Se procede a declarar todas las palabras reservadas que pertenezcan al lenguaje.
-                MarkReservedWords("print","println","True", "False", "int", "double", "string","boolean","while","for","else","if");
+                MarkReservedWords("print","println","True", "False", "int", "double", "string","boolean","while","for","else","if", "break", "continue");
 
                 #endregion
 
-                #region DECLRACIÓN DE TERMINALES
+            #region DECLRACIÓN DE TERMINALES
                     Terminal ptcoma = ToTerm(";"),
                        parizq = ToTerm("("),
                        parder = ToTerm(")"),
@@ -84,23 +86,28 @@ namespace Compiladores2_LabProyecto1.Gramaticas
 
             #region DEFINICIÓN DE NO TERMINALES
             NonTerminal INI = new NonTerminal("INIT");
-                NonTerminal INSTRUCCIONES = new NonTerminal("INSTRUCCIONES");
-                NonTerminal INSTRUCCION = new NonTerminal("INSTRUCCION");
-                NonTerminal IMPRIMIR = new NonTerminal("IMPRIMIR");
-                NonTerminal ERROR = new NonTerminal("ERROR");
-                NonTerminal EXPRESION = new NonTerminal("EXPRESION");
-                NonTerminal PRIMITIVA = new NonTerminal("PRIMITIVA");
-                NonTerminal EXPRESION_ARITMETICA = new NonTerminal("EXPRESION_ARITMETICA");
-                NonTerminal EXPRESION_LOGICA = new NonTerminal("EXPRESION_LOGICA");
-                NonTerminal EXPRESION_RELACIONAL = new NonTerminal("EXPRESION_RELACIONAL");
-                NonTerminal DECLARACION = new NonTerminal("DECLARACION");
-                NonTerminal TIPO = new NonTerminal("TIPO");
-                NonTerminal LISTA_SIM = new NonTerminal("LISTA_SIM");
+            NonTerminal INSTRUCCIONES = new NonTerminal("INSTRUCCIONES");
+            NonTerminal INSTRUCCION = new NonTerminal("INSTRUCCION");
+            NonTerminal IMPRIMIR = new NonTerminal("IMPRIMIR");
+            NonTerminal ERROR = new NonTerminal("ERROR");
+            NonTerminal EXPRESION = new NonTerminal("EXPRESION");
+            NonTerminal PRIMITIVA = new NonTerminal("PRIMITIVA");
+            NonTerminal EXPRESION_ARITMETICA = new NonTerminal("EXPRESION_ARITMETICA");
+            NonTerminal EXPRESION_LOGICA = new NonTerminal("EXPRESION_LOGICA");
+            NonTerminal EXPRESION_RELACIONAL = new NonTerminal("EXPRESION_RELACIONAL");
+            NonTerminal DECLARACION = new NonTerminal("DECLARACION");
+            NonTerminal TIPO = new NonTerminal("TIPO");
+            NonTerminal LISTA_SIM = new NonTerminal("LISTA_SIM");
             NonTerminal ASIGNACION = new NonTerminal("ASIGNACION");
             NonTerminal IF = new NonTerminal("IF");
             NonTerminal BLOQUE_SENTENCIAS_IF = new NonTerminal("BLOQUE_SENTENCIAS_IF");
             NonTerminal LISTADO_ELSE_IF = new NonTerminal("LISTADO_ELSE_IF");
             NonTerminal ELSE_IF = new NonTerminal("ELSE_IF");
+            NonTerminal FOR = new NonTerminal("FOR");
+            NonTerminal INICIALIZACION = new NonTerminal("INICIALIZACION");
+            NonTerminal WHILE = new NonTerminal("WHILE");
+            NonTerminal CONTINUE = new NonTerminal("CONTINUE");
+            NonTerminal BREAK = new NonTerminal("BREAK");
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
@@ -112,11 +119,25 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             INSTRUCCION.Rule = IMPRIMIR + ptcoma
                              | DECLARACION + ptcoma
                              | ASIGNACION + ptcoma 
-                             | IF ;
+                             | IF 
+                             | FOR 
+                             | WHILE
+                             | CONTINUE 
+                             | BREAK ;
 
             //BLOQUE_SENTENCIAS IF
             BLOQUE_SENTENCIAS_IF.Rule = llaizq + INSTRUCCIONES + llader
-                                      | INSTRUCCION;
+                                      | INSTRUCCION;   
+
+            //FOR
+            FOR.Rule = pr_for + parizq + INICIALIZACION + ptcoma + EXPRESION_RELACIONAL + ptcoma + ASIGNACION + parder + BLOQUE_SENTENCIAS_IF;
+            INICIALIZACION.Rule = DECLARACION | ASIGNACION;
+
+            //while
+            WHILE.Rule = pr_while + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF;
+
+            CONTINUE.Rule = pr_continue + ptcoma;
+            BREAK.Rule = pr_break + ptcoma;
 
             //IF
             IF.Rule = pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF
@@ -125,7 +146,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
 
             LISTADO_ELSE_IF.Rule = MakeStarRule(LISTADO_ELSE_IF, ELSE_IF);
 
-            ELSE_IF.Rule = pr_else + pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF;
+            ELSE_IF.Rule = pr_else + pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF; //REVISAR ESTA PRODUCCION POR QUE GENERA BIEN EL ARBOL
 
             //IMPRIMIR
             IMPRIMIR.Rule = pr_print + parizq + EXPRESION + parder

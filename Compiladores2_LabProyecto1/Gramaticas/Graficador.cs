@@ -46,7 +46,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
 
                 startInfo = new ProcessStartInfo
                 {
-                    FileName = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+                    FileName = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
                     Arguments = "ReporteAST.html",
                     UseShellExecute = false
                 };

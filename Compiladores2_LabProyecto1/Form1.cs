@@ -151,7 +151,7 @@ namespace Compiladores2_LabProyecto1
 
 			TextArea.Lexer = Lexer.Cpp;
 
-			TextArea.SetKeywords(0, "print println if else for while switch case default");
+			TextArea.SetKeywords(0, "print println if else for while switch case default int string double boolean");
 			TextArea.SetKeywords(1, "True False");
 
 		}

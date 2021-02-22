@@ -50,7 +50,38 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             {
                 return analizarNodo(actual.ChildNodes[0]);
             }
+            //break
+            if (validarUbicacion(actual, "BREAK"))
+            {
+                return new Break(actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //continue
+            if (validarUbicacion(actual, "CONTINUE"))
+            {
+                return new Continue(actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //while
+            else if (validarUbicacion(actual, "WHILE"))
+            {
+                Expresion condicion = (Expresion)analizarNodo(actual.ChildNodes[1]);
+                LinkedList<Instruccion> instruccioenes = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[2]);
 
+                return new While(condicion, instruccioenes, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //FOR
+            else if (validarUbicacion(actual, "FOR"))
+            {
+                Instruccion inicializacion = (Instruccion)analizarNodo(actual.ChildNodes[1]);
+                Instruccion actualizacion = (Instruccion)analizarNodo(actual.ChildNodes[3]);
+                LinkedList<Instruccion> bloque = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[4]);
+
+                return new For(inicializacion, (Expresion)analizarNodo(actual.ChildNodes[2]), actualizacion, bloque, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            else if (validarUbicacion(actual, "INICIALIZACION"))
+            {
+
+                return analizarNodo(actual.ChildNodes[0]);
+            }
             //IF
             else if (validarUbicacion(actual, "IF"))
             {
@@ -60,7 +91,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 LinkedList<If> listadoElseIF = new LinkedList<If>();
 
 
-                if(actual.ChildNodes.Count == 6) //if - else if - else
+                if (actual.ChildNodes.Count == 6) //if - else if - else
                 {
                     //se obtiene el else
                     instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[5]);
@@ -83,14 +114,14 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                     }
                 }
 
-                return new If(condicionIF, instruccioenesIF, instruccioenesElse,listadoElseIF, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+                return new If(condicionIF, instruccioenesIF, instruccioenesElse, listadoElseIF, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
 
             }
             //BLOQUE DE SENTENCIAS PARA EL IF
             else if (validarUbicacion(actual, "BLOQUE_SENTENCIAS_IF"))
             {
-                
-                if(actual.ChildNodes.Count == 3)
+
+                if (actual.ChildNodes.Count == 3)
                     return analizarNodo(actual.ChildNodes[1]);
                 else
                 {
@@ -217,7 +248,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 {
                     return new Identificador(value.ToString(), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
                 }
-                else if(validarUbicacion(actual.ChildNodes[0], "cadena"))
+                else if (validarUbicacion(actual.ChildNodes[0], "cadena"))
                 {
                     return new Primitivo(value.ToString().Replace("'", ""), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
                 }

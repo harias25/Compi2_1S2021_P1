@@ -317,7 +317,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
                     #region DIFERENTE
                     else if (operador == Operador.DIFERENTE_QUE)
                     {
-                        return op1 != op2;
+                        return !op1.Equals(op2);
                     }
                     #endregion
                     #region AND

@@ -34,6 +34,10 @@ namespace IDE_C2.Arbol.Instrucciones
                 Entorno local = new Entorno(ent);
                 foreach (Instruccion nodo in instrucciones)
                 {
+                    if (nodo is Break)
+                        return nodo;
+                    if (nodo is Continue)
+                        return nodo;
                     nodo.ejecutar(local, arbol);
                 }
                 return null;
@@ -48,6 +52,11 @@ namespace IDE_C2.Arbol.Instrucciones
                         Entorno localElseIf = new Entorno(ent);
                         foreach (Instruccion nodo in elseIf.instrucciones)
                         {
+                            if (nodo is Break)
+                                return nodo;
+                            if (nodo is Continue)
+                                return nodo;
+
                             nodo.ejecutar(localElseIf, arbol);
                         }
                         return null;
@@ -60,6 +69,12 @@ namespace IDE_C2.Arbol.Instrucciones
                     Entorno local = new Entorno(ent);
                     foreach (Instruccion nodo in instrucciones_else)
                     {
+                        if (nodo is Break)
+                            return nodo;
+
+                        if (nodo is Continue)
+                            return nodo;
+
                         nodo.ejecutar(local, arbol);
                     }
                     return null;
