@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using Compiladores2_LabProyecto1.Arbol.ast;
 using Compiladores2_LabProyecto1.Arbol.Intefaces;
 using Compiladores2_LabProyecto1.Gramaticas;
+using IDE_C2.Arbol.Instrucciones;
 using Irony;
 using Irony.Parsing;
 using ScintillaNET;
@@ -217,6 +218,21 @@ namespace Compiladores2_LabProyecto1
 						foreach (Instruccion ins in ast.Instrucciones)
 						{
 							ins.ejecutar(ent, ast);
+						}
+
+                        if (ast.existeFuncion("main"))
+                        {
+							Funcion main = ast.getFuncion("main");
+							foreach (Instruccion ins in main.instrucciones)
+							{
+								ins.ejecutar(ent, ast);
+							}
+						}
+                        else
+                        {
+							MessageBox.Show("No se encontró la funcion main!!", "Errores",
+										 MessageBoxButtons.OK,
+										 MessageBoxIcon.Error);
 						}
 
 						Graficador j = new Graficador();

@@ -84,14 +84,13 @@ namespace Compiladores2_LabProyecto1.Arbol.ast
             id = id.ToLower();
             for (Entorno e = this; e != null; e = e.Anterior)
             {
-                Simbolo encontrado = (Simbolo)(e.Tabla[id]);
-                if (encontrado != null)
+                if (e.Tabla.Contains(id))
                 {
-                    return encontrado;
+                    return (Simbolo)e.Tabla[id];
                 }
             }
-
             return null;
+            
         }
 
         public void reemplazar(String id, Simbolo nuevoValor)

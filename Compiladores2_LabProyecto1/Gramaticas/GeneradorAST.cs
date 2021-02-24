@@ -34,7 +34,31 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             //INICIO DE GRAMATICA
             if (validarUbicacion(actual, "INIT"))
             {
-                return new AST((LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[0]));
+                LinkedList<Instruccion> pila = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[0]);
+                LinkedList<Objeto> objetos = new LinkedList<Objeto>();
+                LinkedList<Instruccion> instrucciones = new LinkedList<Instruccion>(); ;
+                LinkedList<Funcion> funciones = new LinkedList<Funcion>();
+                foreach(Instruccion ins in pila)
+                {
+                    if (ins is Funcion)
+                        funciones.AddLast((Funcion)ins);
+                    else if (ins is Objeto)
+                        objetos.AddLast((Objeto)ins);
+                    else
+                        instrucciones.AddLast(ins);
+                }
+
+                return new AST(instrucciones,funciones,objetos);
+            }
+            //LISTADO DE INSTRUCCIONES GLOBALES
+            else if (validarUbicacion(actual, "GLOBALES"))
+            {
+                LinkedList<Instruccion> instrucciones = new LinkedList<Instruccion>();
+                foreach (ParseTreeNode hijo in actual.ChildNodes)
+                {
+                    instrucciones.AddLast((Instruccion)analizarNodo(hijo));
+                }
+                return instrucciones;
             }
             //LISTADO DE INSTRUCCIONES
             else if (validarUbicacion(actual, "INSTRUCCIONES"))
@@ -46,17 +70,72 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 }
                 return instrucciones;
             }
-            if (validarUbicacion(actual, "INSTRUCCION"))
+            else if (validarUbicacion(actual, "INSTRUCCION"))
             {
                 return analizarNodo(actual.ChildNodes[0]);
             }
+            else if (validarUbicacion(actual, "GLOBAL"))
+            {
+                return analizarNodo(actual.ChildNodes[0]);
+            }
+            //llamada de funciones y procedimientos
+            else if (validarUbicacion(actual, "LLAMADA"))
+            {
+                LinkedList<Expresion> expresions = new LinkedList<Expresion>();
+                if (actual.ChildNodes[1].ChildNodes.Count > 0)
+                {
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
+                    {
+                        expresions.AddLast((Expresion)analizarNodo(hijo));
+                    }
+                }
+                return new Llamada(actual.ChildNodes[0].Token.Text, expresions, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //funciones y procedimientos
+            else if (validarUbicacion(actual, "FUNCION"))
+            {
+                Tipos tipo = Tipos.STRUCT;
+                if (actual.ChildNodes[0].Term.Name == "void")
+                    tipo = Tipos.VOID;
+                else if (actual.ChildNodes[0].Term.Name == "id")
+                    tipo = Tipos.STRUCT;
+                else
+                    tipo = (Tipos)analizarNodo(actual.ChildNodes[0]);
+
+                LinkedList<Simbolo> parametros = new LinkedList<Simbolo>();
+                if (actual.ChildNodes[2].ChildNodes.Count > 0)
+                {
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[2].ChildNodes)
+                    {
+                        Tipos subtipo = Tipos.VOID;
+                        String Struct = "";
+                        if (hijo.ChildNodes[0].Term.Name == "id")
+                        {
+                            subtipo = Tipos.STRUCT;
+                            Struct = hijo.Token.Text;
+                        }
+                        else
+                        {
+                            subtipo = (Tipos)analizarNodo(hijo.ChildNodes[0]);
+                        }
+                        Simbolo simbolo = new Simbolo(subtipo, hijo.ChildNodes[1].Token.Text, hijo.ChildNodes[1].Token.Location.Line, hijo.ChildNodes[1].Token.Location.Column,Struct);
+                        parametros.AddLast(simbolo);
+                    }
+                }
+                return new Funcion(tipo, actual.ChildNodes[1].Token.Text, parametros, (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[3]), actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
+            }
+            //return 
+            else if (validarUbicacion(actual, "RETURN"))
+            {
+                return new Return((Expresion)analizarNodo(actual.ChildNodes[1]),actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
             //break
-            if (validarUbicacion(actual, "BREAK"))
+            else if(validarUbicacion(actual, "BREAK"))
             {
                 return new Break(actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
             }
             //continue
-            if (validarUbicacion(actual, "CONTINUE"))
+            else if(validarUbicacion(actual, "CONTINUE"))
             {
                 return new Continue(actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
             }
@@ -90,32 +169,30 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 LinkedList<Instruccion> instruccioenesElse = new LinkedList<Instruccion>();
                 LinkedList<If> listadoElseIF = new LinkedList<If>();
 
-
-                if (actual.ChildNodes.Count == 6) //if - else if - else
-                {
-                    //se obtiene el else
-                    instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[5]);
-                }
-
-                if (actual.ChildNodes.Count == 5) //if - else
-                {
-                    //se obtiene el else
-                    instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(actual.ChildNodes[4]);
-                }
-
-                if (actual.ChildNodes.Count != 5 && actual.ChildNodes[3].ChildNodes.Count > 0)  //se verifica que se tengan else if
+                if (actual.ChildNodes[3].ChildNodes.Count > 0)
                 {
                     foreach (ParseTreeNode hijo in actual.ChildNodes[3].ChildNodes)
                     {
                         if (hijo.ChildNodes.Count > 0)
                         {
-                            listadoElseIF.AddLast(new If((Expresion)analizarNodo(hijo.ChildNodes[2]), (LinkedList<Instruccion>)analizarNodo(hijo.ChildNodes[3]), null, null, hijo.ChildNodes[0].Token.Location.Line, hijo.ChildNodes[0].Token.Location.Column));
+                            if (hijo.ChildNodes.Count == 2)
+                            {
+                                instruccioenesElse = (LinkedList<Instruccion>)analizarNodo(hijo.ChildNodes[1]);
+                            }
+                            else
+                            {
+                                listadoElseIF.AddLast(new If((Expresion)analizarNodo(hijo.ChildNodes[2]), (LinkedList<Instruccion>)analizarNodo(hijo.ChildNodes[3]), null, null, hijo.ChildNodes[0].Token.Location.Line, hijo.ChildNodes[0].Token.Location.Column));
+                            }
                         }
                     }
                 }
 
                 return new If(condicionIF, instruccioenesIF, instruccioenesElse, listadoElseIF, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
-
+            }
+            //BLOQUE DE SENTENCIAS 
+            else if (validarUbicacion(actual, "BLOQUE_SENTENCIAS"))
+            {
+                return analizarNodo(actual.ChildNodes[1]);
             }
             //BLOQUE DE SENTENCIAS PARA EL IF
             else if (validarUbicacion(actual, "BLOQUE_SENTENCIAS_IF"))
@@ -172,6 +249,14 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 {
                     return Tipos.STRING;
                 }
+                else if (validarUbicacion(actual.ChildNodes[0], "int"))
+                {
+                    return Tipos.INT;
+                }
+                else if (validarUbicacion(actual.ChildNodes[0], "void"))
+                {
+                    return Tipos.VOID;
+                }
                 else if (validarUbicacion(actual.ChildNodes[0], "boolean"))
                 {
                     return Tipos.BOOL;
@@ -181,7 +266,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                     return Tipos.DOUBLE;
                 }
                 else
-                    return Tipos.INT;
+                    return Tipos.STRUCT;
             }
 
             #region EXPRESIONES

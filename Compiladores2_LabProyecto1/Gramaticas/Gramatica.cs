@@ -25,10 +25,12 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                  pr_while = ToTerm("while"),
                  pr_continue = ToTerm("continue"),
                  pr_break = ToTerm("break"),
+                 pr_void = ToTerm("void"),
+                 pr_return = ToTerm("return"),
                  pr_boolean = ToTerm("boolean");
 
                 // Se procede a declarar todas las palabras reservadas que pertenezcan al lenguaje.
-                MarkReservedWords("print","println","True", "False", "int", "double", "string","boolean","while","for","else","if", "break", "continue");
+                MarkReservedWords("return","void","print","println","True", "False", "int", "double", "string","boolean","while","for","else","if", "break", "continue");
 
                 #endregion
 
@@ -101,6 +103,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             NonTerminal ASIGNACION = new NonTerminal("ASIGNACION");
             NonTerminal IF = new NonTerminal("IF");
             NonTerminal BLOQUE_SENTENCIAS_IF = new NonTerminal("BLOQUE_SENTENCIAS_IF");
+            NonTerminal BLOQUE_SENTENCIAS = new NonTerminal("BLOQUE_SENTENCIAS");
             NonTerminal LISTADO_ELSE_IF = new NonTerminal("LISTADO_ELSE_IF");
             NonTerminal ELSE_IF = new NonTerminal("ELSE_IF");
             NonTerminal FOR = new NonTerminal("FOR");
@@ -108,13 +111,29 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             NonTerminal WHILE = new NonTerminal("WHILE");
             NonTerminal CONTINUE = new NonTerminal("CONTINUE");
             NonTerminal BREAK = new NonTerminal("BREAK");
+            NonTerminal RETURN = new NonTerminal("RETURN");
+            NonTerminal GLOBALES = new NonTerminal("GLOBALES");
+            NonTerminal GLOBAL = new NonTerminal("GLOBAL");
+
+            NonTerminal FUNCION = new NonTerminal("FUNCION");
+            NonTerminal PARAMETROS = new NonTerminal("PARAMETROS");
+            NonTerminal PARAMETRO = new NonTerminal("PARAMETRO");
+            
+            NonTerminal LLAMADA = new NonTerminal("LLAMADA");
+            NonTerminal EXPRESIONES = new NonTerminal("EXPRESIONES");
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
 
-            INI.Rule = INSTRUCCIONES;
+            INI.Rule = GLOBALES;
+
+            GLOBALES.Rule = MakePlusRule(GLOBALES, GLOBAL);
+            GLOBAL.Rule = DECLARACION + ptcoma
+                        | FUNCION;
 
             //INSTRUCCIONES
+            BLOQUE_SENTENCIAS.Rule = llaizq + INSTRUCCIONES + llader;
+
             INSTRUCCIONES.Rule = MakePlusRule(INSTRUCCIONES, INSTRUCCION);
             INSTRUCCION.Rule = IMPRIMIR + ptcoma
                              | DECLARACION + ptcoma
@@ -123,11 +142,28 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                              | FOR 
                              | WHILE
                              | CONTINUE 
-                             | BREAK ;
+                             | BREAK 
+                             | RETURN 
+                             | LLAMADA + ptcoma;
+
+
+            //DEFINICION DE FUNCIONES Y/O PROCEDIMIENTOS
+            FUNCION.Rule = TIPO + id +parizq +PARAMETROS+ parder+ BLOQUE_SENTENCIAS
+                         | pr_void + id + parizq + PARAMETROS + parder + BLOQUE_SENTENCIAS;
+
+            PARAMETROS.Rule = MakeStarRule(PARAMETROS,coma, PARAMETRO);
+            PARAMETRO.Rule = TIPO + id
+                           | id + id ;
+
+            //LLAMADA DE FUNCIONES Y/O PROCEDIMIENTOS
+            LLAMADA.Rule = id + parizq + EXPRESIONES + parder;
+            EXPRESIONES.Rule = MakeStarRule(EXPRESIONES, coma, EXPRESION);
+
+            RETURN.Rule = pr_return + EXPRESION + ptcoma;
 
             //BLOQUE_SENTENCIAS IF
-            BLOQUE_SENTENCIAS_IF.Rule = llaizq + INSTRUCCIONES + llader
-                                      | INSTRUCCION;   
+            BLOQUE_SENTENCIAS_IF.Rule = llaizq + INSTRUCCIONES + llader;
+                                    //  | INSTRUCCION;   
 
             //FOR
             FOR.Rule = pr_for + parizq + INICIALIZACION + ptcoma + EXPRESION_RELACIONAL + ptcoma + ASIGNACION + parder + BLOQUE_SENTENCIAS_IF;
@@ -140,13 +176,13 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             BREAK.Rule = pr_break + ptcoma;
 
             //IF
-            IF.Rule = pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF
-                    | pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF  + pr_else + BLOQUE_SENTENCIAS_IF
-                    | pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF + pr_else + BLOQUE_SENTENCIAS_IF;
+            IF.Rule = pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF + LISTADO_ELSE_IF;
 
-            LISTADO_ELSE_IF.Rule = MakeStarRule(LISTADO_ELSE_IF, ELSE_IF);
+            LISTADO_ELSE_IF.Rule = MakePlusRule(LISTADO_ELSE_IF, ELSE_IF);
 
-            ELSE_IF.Rule = pr_else + pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF; //REVISAR ESTA PRODUCCION POR QUE GENERA BIEN EL ARBOL
+            ELSE_IF.Rule = pr_else + pr_if + parizq + EXPRESION + parder + BLOQUE_SENTENCIAS_IF
+                         | pr_else + BLOQUE_SENTENCIAS_IF
+                         | Empty;
 
             //IMPRIMIR
             IMPRIMIR.Rule = pr_print + parizq + EXPRESION + parder
@@ -166,7 +202,8 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 | EXPRESION_ARITMETICA
                 | parizq + EXPRESION + parder
                 | EXPRESION_LOGICA
-                | EXPRESION_RELACIONAL;
+                | EXPRESION_RELACIONAL
+                | LLAMADA ;
 
 
             //NUMERICA

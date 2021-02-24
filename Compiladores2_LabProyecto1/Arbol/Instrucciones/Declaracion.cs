@@ -29,6 +29,32 @@ namespace IDE_C2.Arbol.Instrucciones
             this.tipo = tipo;
         }
 
+        Tipos getTipo(Object valor)
+        {
+            if (valor is bool)
+            {
+                return Tipos.BOOL;
+            }
+            else if (valor is string)
+            {
+                return Tipos.STRING;
+            }
+            else if (valor is int)
+            {
+                return Tipos.INT;
+            }
+            else if (valor is double)
+            {
+                return Tipos.DOUBLE;
+            }
+            else if (valor is Decimal)
+            {
+                return Tipos.DOUBLE;
+            }
+            else
+                return Tipos.STRING;
+        }
+
         public object ejecutar(Entorno ent, AST arbol)
         {
             object valor_simbolo = null;
@@ -36,7 +62,10 @@ namespace IDE_C2.Arbol.Instrucciones
             if (valor != null)
             {
                 valor_simbolo = valor.getValorImplicito(ent, arbol);
-                tipoResultado = valor.getTipo(ent, arbol);
+                if (valor is Funcion)
+                    tipoResultado  = valor.getTipo(ent, arbol);
+                else
+                    tipoResultado = getTipo(valor_simbolo);
             }
             else
             {
@@ -53,7 +82,7 @@ namespace IDE_C2.Arbol.Instrucciones
 
             foreach (Simbolo variable in variables)
             {
-                if (!ent.existe(variable.indentificador))
+                if (!ent.existeEnActual(variable.indentificador))
                 {
                     if (tipo == tipoResultado)
                     {

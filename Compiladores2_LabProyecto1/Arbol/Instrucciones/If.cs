@@ -1,5 +1,6 @@
 ﻿using Compiladores2_LabProyecto1.Arbol.ast;
 using Compiladores2_LabProyecto1.Arbol.Intefaces;
+using IDE_C2.Arbol.ValoresImplicitos;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -34,10 +35,11 @@ namespace IDE_C2.Arbol.Instrucciones
                 Entorno local = new Entorno(ent);
                 foreach (Instruccion nodo in instrucciones)
                 {
-                    if (nodo is Break)
+                    if (nodo is Break || nodo is Continue) {
                         return nodo;
-                    if (nodo is Continue)
-                        return nodo;
+                    } else if (nodo is Return) {
+                        return nodo.ejecutar(local, arbol);
+                    }
                     nodo.ejecutar(local, arbol);
                 }
                 return null;
@@ -52,11 +54,14 @@ namespace IDE_C2.Arbol.Instrucciones
                         Entorno localElseIf = new Entorno(ent);
                         foreach (Instruccion nodo in elseIf.instrucciones)
                         {
-                            if (nodo is Break)
+                            if (nodo is Break || nodo is Continue)
+                            {
                                 return nodo;
-                            if (nodo is Continue)
-                                return nodo;
-
+                            }
+                            else if (nodo is Return)
+                            {
+                                return nodo.ejecutar(localElseIf, arbol);
+                            }
                             nodo.ejecutar(localElseIf, arbol);
                         }
                         return null;
@@ -69,15 +74,16 @@ namespace IDE_C2.Arbol.Instrucciones
                     Entorno local = new Entorno(ent);
                     foreach (Instruccion nodo in instrucciones_else)
                     {
-                        if (nodo is Break)
+                        if (nodo is Break || nodo is Continue)
+                        {
                             return nodo;
-
-                        if (nodo is Continue)
-                            return nodo;
-
+                        }
+                        else if (nodo is Return)
+                        {
+                            return nodo.ejecutar(local, arbol);
+                        }
                         nodo.ejecutar(local, arbol);
                     }
-                    return null;
                 }
             }
             return null;
