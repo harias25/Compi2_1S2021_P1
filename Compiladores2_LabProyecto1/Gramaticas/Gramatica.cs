@@ -27,10 +27,11 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                  pr_break = ToTerm("break"),
                  pr_void = ToTerm("void"),
                  pr_return = ToTerm("return"),
-                 pr_boolean = ToTerm("boolean");
+                 pr_boolean = ToTerm("boolean"),
+                 pr_struct = ToTerm("struct");
 
                 // Se procede a declarar todas las palabras reservadas que pertenezcan al lenguaje.
-                MarkReservedWords("return","void","print","println","True", "False", "int", "double", "string","boolean","while","for","else","if", "break", "continue");
+                MarkReservedWords("struct","return ","void","print","println","True", "False", "int", "double", "string","boolean","while","for","else","if", "break", "continue");
 
                 #endregion
 
@@ -53,6 +54,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                        mayor_igual = ToTerm(">="),
                        igual = ToTerm("="),
                        coma = ToTerm(","),
+                       punto = ToTerm("."),
                        llaizq = ToTerm("{"),
                        llader = ToTerm("}"),
                        resto = ToTerm("%");
@@ -112,6 +114,7 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             NonTerminal CONTINUE = new NonTerminal("CONTINUE");
             NonTerminal BREAK = new NonTerminal("BREAK");
             NonTerminal RETURN = new NonTerminal("RETURN");
+
             NonTerminal GLOBALES = new NonTerminal("GLOBALES");
             NonTerminal GLOBAL = new NonTerminal("GLOBAL");
 
@@ -121,6 +124,12 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             
             NonTerminal LLAMADA = new NonTerminal("LLAMADA");
             NonTerminal EXPRESIONES = new NonTerminal("EXPRESIONES");
+
+            NonTerminal STRUCT = new NonTerminal("STRUCT");
+            NonTerminal BLOQUE_DECLARACIONES = new NonTerminal("BLOQUE_DECLARACIONES");
+            NonTerminal ACCESO_STRUCT = new NonTerminal("ACCESO_STRUCT");
+            NonTerminal ACCESOS = new NonTerminal("ACCESOS");
+            NonTerminal ASIGNACION_STRUCT = new NonTerminal("ASIGNACION_STRUCT");
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
@@ -128,16 +137,18 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             INI.Rule = GLOBALES;
 
             GLOBALES.Rule = MakePlusRule(GLOBALES, GLOBAL);
-            GLOBAL.Rule = DECLARACION + ptcoma
-                        | FUNCION;
+            GLOBAL.Rule = DECLARACION 
+                        | FUNCION
+                        | STRUCT ;
 
             //INSTRUCCIONES
             BLOQUE_SENTENCIAS.Rule = llaizq + INSTRUCCIONES + llader;
 
             INSTRUCCIONES.Rule = MakePlusRule(INSTRUCCIONES, INSTRUCCION);
             INSTRUCCION.Rule = IMPRIMIR + ptcoma
-                             | DECLARACION + ptcoma
-                             | ASIGNACION + ptcoma 
+                             | DECLARACION 
+                             | ASIGNACION + ptcoma
+                             | ASIGNACION_STRUCT + ptcoma
                              | IF 
                              | FOR 
                              | WHILE
@@ -146,6 +157,16 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                              | RETURN 
                              | LLAMADA + ptcoma;
 
+            //DEFINICION DE STRUCTS
+            STRUCT.Rule = pr_struct + id + llaizq + BLOQUE_DECLARACIONES + llader + ptcoma;
+            BLOQUE_DECLARACIONES.Rule = MakePlusRule(BLOQUE_DECLARACIONES, DECLARACION);
+
+            //ACCESO DE STRUCTS
+            ACCESO_STRUCT.Rule = id + ACCESOS;
+            ACCESOS.Rule = MakePlusRule(ACCESOS, punto+id);
+
+            //ASIGNACION DE STRUCTS
+            ASIGNACION_STRUCT.Rule = id + ACCESOS + igual + EXPRESION;
 
             //DEFINICION DE FUNCIONES Y/O PROCEDIMIENTOS
             FUNCION.Rule = TIPO + id +parizq +PARAMETROS+ parder+ BLOQUE_SENTENCIAS
@@ -189,8 +210,9 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                           | pr_println + parizq + EXPRESION + parder;
 
             //DECLARACIONES
-            DECLARACION.Rule = TIPO + LISTA_SIM
-                             | TIPO + id + igual + EXPRESION;  //declaracion
+            DECLARACION.Rule = TIPO + LISTA_SIM + ptcoma
+                             | id + LISTA_SIM + ptcoma
+                             | TIPO + id + igual + EXPRESION + ptcoma;  //declaracion
 
             LISTA_SIM.Rule = MakePlusRule(LISTA_SIM, coma, id);
 
@@ -203,7 +225,8 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 | parizq + EXPRESION + parder
                 | EXPRESION_LOGICA
                 | EXPRESION_RELACIONAL
-                | LLAMADA ;
+                | LLAMADA
+                | ACCESO_STRUCT;
 
 
             //NUMERICA
@@ -225,11 +248,11 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 | EXPRESION + mayor_igual + EXPRESION
                 | EXPRESION + menor_igual + EXPRESION;
 
-            PRIMITIVA.Rule = numero 
-                           | cadena 
+            PRIMITIVA.Rule = numero
+                           | cadena
                            | pr_true
                            | pr_false
-                           | id;  //simbolo
+                           | id;//simbolo
 
             TIPO.Rule = pr_int | pr_string | pr_boolean | pr_double;
 

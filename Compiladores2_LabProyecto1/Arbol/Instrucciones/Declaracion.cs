@@ -20,13 +20,16 @@ namespace IDE_C2.Arbol.Instrucciones
 
         private LinkedList<Simbolo> variables;
 
-        public Declaracion(Tipos tipo, LinkedList<Simbolo> variables, Expresion valor, int linea, int columna)
+        private String Struct;
+
+        public Declaracion(Tipos tipo, LinkedList<Simbolo> variables, Expresion valor, int linea, int columna, String Struct="")
         {
             this.variables = variables;
             this.columna = columna;
             this.linea = linea;
             this.valor = valor;
             this.tipo = tipo;
+            this.Struct = Struct;
         }
 
         Tipos getTipo(Object valor)
@@ -78,6 +81,19 @@ namespace IDE_C2.Arbol.Instrucciones
                     valor_simbolo = 0;
                 else if (tipo == Tipos.STRING)
                     valor_simbolo = "";
+                else if (tipo == Tipos.STRUCT)  //seccion nueva para objetos
+                {
+                    Objeto objeto = arbol.getObjeto(Struct);
+                    if (objeto != null)
+                    {
+                        valor_simbolo = objeto;
+                    }
+                    else
+                    {
+                        Form1.Consola.AppendText("Error semantico en Declaracion, no existe el Struct "+Struct+" en la linea " + this.linea + " y columna " + this.columna + "\n");
+                        return false;
+                    }
+                }
             }
 
             foreach (Simbolo variable in variables)

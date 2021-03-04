@@ -1,5 +1,6 @@
 ﻿using Compiladores2_LabProyecto1.Arbol.ast;
 using Compiladores2_LabProyecto1.Arbol.Intefaces;
+using IDE_C2.Arbol.ValoresImplicitos;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -43,6 +44,10 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
             else if (valor is Decimal)
             {
                 return Tipos.DOUBLE;
+            }
+            else if (valor is Objeto)
+            {
+                return Tipos.STRUCT;
             }
             else
                 return Tipos.STRING;

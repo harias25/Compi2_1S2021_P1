@@ -78,6 +78,49 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             {
                 return analizarNodo(actual.ChildNodes[0]);
             }
+            //definicion de objetos
+            else if (validarUbicacion(actual, "STRUCT"))
+            {
+                LinkedList<Instruccion> declaraciones = new LinkedList<Instruccion>();
+                foreach (ParseTreeNode hijo in actual.ChildNodes[3].ChildNodes)
+                {
+                    declaraciones.AddLast((Instruccion)analizarNodo(hijo));
+                }
+
+                return new Objeto(actual.ChildNodes[1].Token.Text, declaraciones, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+
+            }
+            //asignación a struct 
+            else if (validarUbicacion(actual, "ASIGNACION_STRUCT"))
+            {
+                LinkedList<String> accesos = (LinkedList<String>)analizarNodo(actual.ChildNodes[1]);
+                return new AsignacionStruct(actual.ChildNodes[0].Token.Text, accesos,(Expresion)analizarNodo(actual.ChildNodes[3]), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            //acceso a struct 
+            else if (validarUbicacion(actual, "ACCESO_STRUCT"))
+            {
+                LinkedList<String> accesos = (LinkedList<String>)analizarNodo(actual.ChildNodes[1]);
+                return new AccesoStruct(actual.ChildNodes[0].Token.Text, accesos, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
+            else if (validarUbicacion(actual, "ACCESOS"))
+            {
+                LinkedList<string> listado = new LinkedList<string>();
+                int contador = 0;
+                foreach (ParseTreeNode hijo in actual.ChildNodes)
+                {
+                    if (hijo.ChildNodes.Count == 0)
+                    {
+                        if(getLexema(actual, contador)!=".")
+                            listado.AddLast(getLexema(actual, contador));
+                    }
+                    else
+                    {
+                        listado.AddLast(getLexema(actual.ChildNodes[contador], 1));
+                    }
+                    contador = contador + 1;
+                }
+                return listado;
+            }
             //llamada de funciones y procedimientos
             else if (validarUbicacion(actual, "LLAMADA"))
             {
@@ -225,22 +268,30 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             else if (validarUbicacion(actual, "DECLARACION"))
             {
                 LinkedList<Simbolo> simbolos = new LinkedList<Simbolo>();
-                Tipos tipo = (Tipos)analizarNodo(actual.ChildNodes[0]);
-
-                if (actual.ChildNodes.Count == 4)
+                Tipos tipo = Tipos.VOID;
+                String nameStruct = "";
+                if (actual.ChildNodes[0].Term.Name == "id")
                 {
-                    Simbolo simbolo = new Simbolo(tipo, actual.ChildNodes[1].Token.Text, actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
+                    tipo = Tipos.STRUCT;
+                    nameStruct = actual.ChildNodes[0].Token.Text;
+                }
+                else
+                    tipo = (Tipos)analizarNodo(actual.ChildNodes[0]);
+
+                if (actual.ChildNodes.Count == 5)
+                {
+                    Simbolo simbolo = new Simbolo(tipo, actual.ChildNodes[1].Token.Text, actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column, nameStruct);
                     simbolos.AddLast(simbolo);
-                    return new Declaracion(tipo, simbolos, (Expresion)analizarNodo(actual.ChildNodes[3]), 0, 0);
+                    return new Declaracion(tipo, simbolos, (Expresion)analizarNodo(actual.ChildNodes[3]), 0, 0, nameStruct);
                 }
                 else
                 {
                     foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
                     {
-                        Simbolo simbolo = new Simbolo(tipo, hijo.Token.Text, hijo.Token.Location.Line, hijo.Token.Location.Column);
+                        Simbolo simbolo = new Simbolo(tipo, hijo.Token.Text, hijo.Token.Location.Line, hijo.Token.Location.Column, nameStruct);
                         simbolos.AddLast(simbolo);
                     }
-                    return new Declaracion(tipo, simbolos, null, 0, 0);
+                    return new Declaracion(tipo, simbolos, null, 0, 0, nameStruct);
                 }
             }
             else if (validarUbicacion(actual, "TIPO"))

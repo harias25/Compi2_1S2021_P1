@@ -40,7 +40,7 @@ namespace IDE_C2.Arbol.Instrucciones
                 }
                 else
                 {
-                    Form1.Consola.AppendText("Error semantico en Declaracion, no se permiten asignar valores de diferentes tipos en linea " + linea + " y columna " + columna + "\n");
+                    Form1.Consola.AppendText("Error semantico en Asignacion, no se permiten asignar valores de diferentes tipos en linea " + linea + " y columna " + columna + "\n");
                     return false;
                 }
             }

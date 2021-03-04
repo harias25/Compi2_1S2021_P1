@@ -37,6 +37,19 @@ namespace Compiladores2_LabProyecto1.Arbol.ast
             return false;
         }
 
+        public Objeto getObjeto(String id)
+        {
+            foreach (Objeto o in objetos)
+            {
+                if (o.id.ToLower().Equals(id.ToLower()))
+                {
+                    Objeto nuevo = (Objeto)o.Clone();
+                    return nuevo;
+                }
+            }
+            return null;
+        }
+
         public Funcion getFuncion(String id)
         {
             foreach (Funcion f in funciones)
@@ -53,7 +66,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ast
         {
             foreach (Objeto obj in Objetos)
             {
-                if (obj.identificador.Equals(nombre, StringComparison.InvariantCultureIgnoreCase))
+                if (obj.id.Equals(nombre, StringComparison.InvariantCultureIgnoreCase))
                 {
                     return true;
                 }

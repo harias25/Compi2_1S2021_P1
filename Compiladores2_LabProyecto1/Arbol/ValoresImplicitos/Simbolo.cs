@@ -18,7 +18,7 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
             STRUCT
         }
 
-        public Simbolo(Tipos Tipo, string Identificador, int linea, int columna, String Struct="")
+        public Simbolo(Tipos Tipo, string Identificador, int linea, int columna,String Struct)
         {
             this.tipo = Tipo;
             this.indentificador = Identificador;
@@ -35,7 +35,6 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
 
         public int linea { get; set; }
         public int columna { get; set; }
-
         public String Struct { get; set; }
 
         public Tipos getTipo(Entorno ent, AST arbol)
