@@ -90,6 +90,17 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 return new Objeto(actual.ChildNodes[1].Token.Text, declaraciones, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
 
             }
+            //acceso ARRAY 
+            else if (validarUbicacion(actual, "ACCESO_ARRAY"))
+            {
+                LinkedList<Expresion> dimensiones = new LinkedList<Expresion>();
+                foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
+                {
+                    dimensiones.AddLast((Expresion)analizarNodo(hijo.ChildNodes[1]));
+                }
+
+                return new AccesoArreglo(actual.ChildNodes[0].Token.Text, dimensiones, actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+            }
             //asignación a struct 
             else if (validarUbicacion(actual, "ASIGNACION_STRUCT"))
             {
@@ -237,6 +248,12 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             {
                 return analizarNodo(actual.ChildNodes[1]);
             }
+            //DIMENSION
+            else if (validarUbicacion(actual, "DIMENSION"))
+            {
+
+                return analizarNodo(actual.ChildNodes[0]);
+            }
             //BLOQUE DE SENTENCIAS PARA EL IF
             else if (validarUbicacion(actual, "BLOQUE_SENTENCIAS_IF"))
             {
@@ -262,7 +279,17 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             //INSTRUCCION ASIGNACION
             else if (validarUbicacion(actual, "ASIGNACION"))
             {
-                return new Asignacion(actual.ChildNodes[0].Token.Text, (Expresion)analizarNodo(actual.ChildNodes[2]), actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
+                if(actual.ChildNodes.Count == 4)
+                {
+                    LinkedList<Expresion> dimensiones = new LinkedList<Expresion>();
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
+                    {
+                        dimensiones.AddLast((Expresion)analizarNodo(hijo.ChildNodes[1]));
+                    }
+                    return new AsignacionArray(actual.ChildNodes[0].Token.Text, dimensiones, (Expresion)analizarNodo(actual.ChildNodes[3]), actual.ChildNodes[0].Token.Location.Line, actual.ChildNodes[0].Token.Location.Column);
+                }
+                else
+                    return new Asignacion(actual.ChildNodes[0].Token.Text, (Expresion)analizarNodo(actual.ChildNodes[2]), actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
             }
             //INSTRUCCION DECLARACION 
             else if (validarUbicacion(actual, "DECLARACION"))
@@ -278,11 +305,21 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 else
                     tipo = (Tipos)analizarNodo(actual.ChildNodes[0]);
 
-                if (actual.ChildNodes.Count == 5)
+                if (actual.ChildNodes.Count == 4)
                 {
                     Simbolo simbolo = new Simbolo(tipo, actual.ChildNodes[1].Token.Text, actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column, nameStruct);
                     simbolos.AddLast(simbolo);
                     return new Declaracion(tipo, simbolos, (Expresion)analizarNodo(actual.ChildNodes[3]), 0, 0, nameStruct);
+                }
+                else if(actual.ChildNodes.Count == 3)
+                {
+                    LinkedList<Expresion> dimensiones = new LinkedList<Expresion>();
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[2].ChildNodes)
+                    {
+                        dimensiones.AddLast((Expresion)analizarNodo(hijo.ChildNodes[1]));
+                    }
+
+                    return new DeclaracionArray(actual.ChildNodes[1].Token.Text, dimensiones, nameStruct, tipo, actual.ChildNodes[1].Token.Location.Line, actual.ChildNodes[1].Token.Location.Column);
                 }
                 else
                 {

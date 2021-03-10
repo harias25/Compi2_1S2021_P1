@@ -39,6 +39,8 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                     Terminal ptcoma = ToTerm(";"),
                        parizq = ToTerm("("),
                        parder = ToTerm(")"),
+                       corizq = ToTerm("["),
+                       corder = ToTerm("]"),
                        signo_mas = ToTerm("+"),
                        signo_menos = ToTerm("-"),
                        signo_por = ToTerm("*"),
@@ -130,6 +132,11 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             NonTerminal ACCESO_STRUCT = new NonTerminal("ACCESO_STRUCT");
             NonTerminal ACCESOS = new NonTerminal("ACCESOS");
             NonTerminal ASIGNACION_STRUCT = new NonTerminal("ASIGNACION_STRUCT");
+
+            NonTerminal DIMENSIONES = new NonTerminal("DIMENSIONES");
+            NonTerminal DIMENSION = new NonTerminal("DIMENSION");
+            NonTerminal ACCESO_ARRAY = new NonTerminal("ACCESO_ARRAY");
+
             #endregion
 
             #region DEFINICIÓN DE GRAMATICA
@@ -212,12 +219,23 @@ namespace Compiladores2_LabProyecto1.Gramaticas
             //DECLARACIONES
             DECLARACION.Rule = TIPO + LISTA_SIM + ptcoma
                              | id + LISTA_SIM + ptcoma
-                             | TIPO + id + igual + EXPRESION + ptcoma;  //declaracion
+                             | TIPO + id + igual + EXPRESION + ptcoma
+                             | TIPO + id + DIMENSIONES + ptcoma
+                             | id + id + DIMENSIONES + ptcoma;  
 
             LISTA_SIM.Rule = MakePlusRule(LISTA_SIM, coma, id);
 
+
+            //DIMENSIONES
+            DIMENSIONES.Rule = MakePlusRule(DIMENSIONES, DIMENSION);
+            DIMENSION.Rule = corizq + EXPRESION + corder;
+
+            //ACCESO ARRAY
+            ACCESO_ARRAY.Rule = id + DIMENSIONES;
+
             //asignacion
-            ASIGNACION.Rule = id + igual + EXPRESION;  //asignacion
+            ASIGNACION.Rule = id + igual + EXPRESION
+                            | id + DIMENSIONES + igual + EXPRESION;  //asignacion
 
             //EXPRESIONES
             EXPRESION.Rule = PRIMITIVA
@@ -226,8 +244,8 @@ namespace Compiladores2_LabProyecto1.Gramaticas
                 | EXPRESION_LOGICA
                 | EXPRESION_RELACIONAL
                 | LLAMADA
-                | ACCESO_STRUCT;
-
+                | ACCESO_STRUCT
+                | ACCESO_ARRAY;
 
             //NUMERICA
             EXPRESION_ARITMETICA.Rule = EXPRESION + signo_mas + EXPRESION

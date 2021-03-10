@@ -15,7 +15,8 @@ namespace Compiladores2_LabProyecto1.Arbol.ValoresImplicitos
             DOUBLE,
             BOOL,
             VOID,
-            STRUCT
+            STRUCT,
+            ARRAY
         }
 
         public Simbolo(Tipos Tipo, string Identificador, int linea, int columna,String Struct)
